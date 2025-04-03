@@ -149,7 +149,8 @@
     "build-docs": "npx tsx  \"./src/app/(public)/documentation/material-ui-components/utils/build.ts\"",
     "postinstall": "node src/utils/node-scripts/fuse-react-message.js",
     "poststart": "node src/utils/node-scripts/fuse-react-message.js",
-    "audit": "npm audit --production"
+    "audit": "npm audit --production",
+    "test": "echo \"⚠️ No tests defined yet\" && exit 0"
   },
   "engines": {
     "node": ">=22.12.0",
