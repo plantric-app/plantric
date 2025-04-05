@@ -7,7 +7,7 @@ import Configurator from 'src/components/theme-layouts/components/configurator/C
 import useFuseLayoutSettings from '@fuse/core/FuseLayout/useFuseLayoutSettings';
 import FuseSuspense from '@fuse/core/FuseSuspense';
 import { Outlet } from 'react-router';
-import FooterLayout3 from './components/FooterLayout3';
+// import FooterLayout3 from './components/FooterLayout3';
 import LeftSideLayout3 from './components/LeftSideLayout3';
 import NavbarWrapperLayout3 from './components/NavbarWrapperLayout3';
 import RightSideLayout3 from './components/RightSideLayout3';
@@ -85,9 +85,9 @@ function Layout3(props: Layout3Props) {
 						{children}
 					</div>
 
-					{config.footer.display && (
+					{/* {config.footer.display && (
 						<FooterLayout3 className={config.footer.style === 'fixed' ? 'sticky bottom-0' : ''} />
-					)}
+					)} */}
 				</main>
 			</div>
 

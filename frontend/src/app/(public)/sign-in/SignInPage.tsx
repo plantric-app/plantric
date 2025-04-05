@@ -13,26 +13,27 @@ import { lighten } from '@mui/material/styles';
 import JwtLoginTab from './tabs/JwtSignInTab';
 import FirebaseSignInTab from './tabs/FirebaseSignInTab';
 import AwsSignInTab from './tabs/AwsSignInTab';
+import { visuallyHidden } from '@mui/utils';
 
 const tabs = [
 	{
 		id: 'jwt',
-		title: 'JWT',
-		logo: '/assets/images/logo/jwt.svg',
-		logoClass: 'h-9 p-1 bg-black rounded-lg'
+		// title: 'JWT',
+		// logo: '/assets/images/logo/jwt.svg',
+		// logoClass: 'h-9 p-1 bg-black rounded-lg'
 	},
-	{
-		id: 'firebase',
-		title: 'Firebase',
-		logo: '/assets/images/logo/firebase.svg',
-		logoClass: 'h-9'
-	},
-	{
-		id: 'aws',
-		title: 'AWS',
-		logo: '/assets/images/logo/aws-amplify.svg',
-		logoClass: 'h-9'
-	}
+	// {
+	// 	id: 'firebase',
+	// 	title: 'Firebase',
+	// 	logo: '/assets/images/logo/firebase.svg',
+	// 	logoClass: 'h-9'
+	// },
+	// {
+	// 	id: 'aws',
+	// 	title: 'AWS',
+	// 	logo: '/assets/images/logo/aws-amplify.svg',
+	// 	logoClass: 'h-9'
+	// }
 ];
 
 /**
@@ -68,18 +69,7 @@ function SignInPage() {
 						</Link>
 					</div>
 
-					<Box
-						className="mt-6 text-md leading-[1.625] rounded-lg py-2 px-4"
-						sx={{
-							backgroundColor: (theme) => lighten(theme.palette.primary.main, 0.8),
-							color: 'primary.dark'
-						}}
-					>
-						You are browsing <b>Fuse React Demo</b>. Click on the "Sign in" button to access the Demo and
-						Documentation.
-					</Box>
-
-					<Tabs
+					{/* <Tabs
 						value={_.findIndex(tabs, { id: selectedTabId })}
 						variant="fullWidth"
 						className="w-full mt-6 mb-8"
@@ -111,11 +101,11 @@ function SignInPage() {
 								label={item.title}
 							/>
 						))}
-					</Tabs>
+					</Tabs> */}
 
 					{selectedTabId === 'jwt' && <JwtLoginTab />}
-					{selectedTabId === 'firebase' && <FirebaseSignInTab />}
-					{selectedTabId === 'aws' && <AwsSignInTab />}
+					{/* {selectedTabId === 'firebase' && <FirebaseSignInTab />}
+					{selectedTabId === 'aws' && <AwsSignInTab />} */}
 				</CardContent>
 			</Paper>
 
@@ -190,26 +180,8 @@ function SignInPage() {
 						<div>our community</div>
 					</div>
 					<div className="mt-6 text-lg leading-6 tracking-tight text-gray-400">
-						Fuse helps developers to build organized and well coded dashboards full of beautiful and rich
+						Plantric helps developers to build organized and well coded dashboards full of beautiful and rich
 						modules. Join us and start building your application today.
-					</div>
-					<div className="mt-8 flex items-center">
-						<AvatarGroup
-							sx={{
-								'& .MuiAvatar-root': {
-									borderColor: 'primary.main'
-								}
-							}}
-						>
-							<Avatar src="/assets/images/avatars/female-18.jpg" />
-							<Avatar src="/assets/images/avatars/female-11.jpg" />
-							<Avatar src="/assets/images/avatars/male-09.jpg" />
-							<Avatar src="/assets/images/avatars/male-16.jpg" />
-						</AvatarGroup>
-
-						<div className="ml-4 font-medium tracking-tight text-gray-400">
-							More than 17k people joined us, it's your turn
-						</div>
 					</div>
 				</div>
 			</Box>

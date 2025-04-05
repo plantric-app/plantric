@@ -31,7 +31,7 @@ function PoweredByLinks() {
 				border: `1px solid ${theme.palette.divider}!important`
 			})}
 		>
-			<Tooltip
+			{/* <Tooltip
 				title="React"
 				placement="top"
 			>
@@ -50,8 +50,8 @@ function PoweredByLinks() {
 						className="min-w-0 w-8"
 					/>
 				</IconButton>
-			</Tooltip>
-			<Tooltip
+			</Tooltip> */}
+			{/* <Tooltip
 				title="Redux Toolkit"
 				placement="top"
 			>
@@ -70,8 +70,8 @@ function PoweredByLinks() {
 						className="min-w-0 w-8"
 					/>
 				</IconButton>
-			</Tooltip>
-			<Tooltip
+			</Tooltip> */}
+			{/* <Tooltip
 				title="Material UI"
 				placement="top"
 			>
@@ -90,8 +90,8 @@ function PoweredByLinks() {
 						className="min-w-0 w-8"
 					/>
 				</IconButton>
-			</Tooltip>
-			<Tooltip
+			</Tooltip> */}
+			{/* <Tooltip
 				title="Tailwind"
 				placement="top"
 			>
@@ -120,8 +120,8 @@ function PoweredByLinks() {
 						}}
 					/>
 				</IconButton>
-			</Tooltip>
-			<Tooltip
+			</Tooltip> */}
+			{/* <Tooltip
 				title="ViteJs"
 				placement="top"
 			>
@@ -140,7 +140,7 @@ function PoweredByLinks() {
 						className="min-w-0 w-7"
 					/>
 				</IconButton>
-			</Tooltip>
+			</Tooltip> */}
 			<Tooltip
 				title="Mock Service Worker"
 				placement="top"
