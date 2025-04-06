@@ -1,4 +1,6 @@
-flask
-psycopg2
-flask_sqlalchemy
-flask_cors
+# File: backend/plantric_app/requirements.txt
+flask==2.0.3
+psycopg2==2.9.3
+flask_sqlalchemy==2.5.1
+flask_cors==3.0.10
+# Add other dependencies as needed
