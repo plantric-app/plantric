@@ -37,9 +37,10 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          cd backend/plantric_app
+          cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r plantric_app/requirements.txt
 
       - name: Run backend tests
         run: echo "No test yet!"
