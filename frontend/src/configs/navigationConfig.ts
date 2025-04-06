@@ -21,12 +21,53 @@ const navigationConfig: FuseNavItemType[] = [
 		children: [
 			{
 				id: 'dashboards.project',
-				title: 'Project',
+				title: 'Dashboard',
 				type: 'item',
 				icon: 'heroicons-outline:clipboard-document-check',
 				url: '/'
-			}
+			},
+			// {
+			// 	id: 'project.create',
+			// 	title: 'Form',
+			// 	type: 'item',
+			// 	icon: 'heroicons-outline:clipboard-document-check',
+			// 	url: '/create/project'
+				
+			// },
+
+			// {
+			// 	id:'project.view',
+			// 	title: 'View Project',
+			// 	type:'item',
+			// 	icon:'heroicons-outline:clipboard-document-check',
+			// 	url: '/view/project'
+			// },
+			{
+				id: 'apps.ecommerce',
+				title: 'Project',
+				type: 'collapse',
+				icon: 'heroicons-outline:list-bullet',
+				translate: 'Project',
+				children: [
+					{
+						id: 'project.create',
+						title: 'Create',
+						type: 'item',
+						icon: 'heroicons-outline:plus',
+						url: '/create/project'
+						
+					},
+					{
+						id:'project.view',
+						title: 'View',
+						type:'item',
+						icon:'heroicons-outline:eye',
+						url: '/view/project'
+					},
+				]
+			},
 		]
+		
 	},
 ];
 
