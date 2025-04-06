@@ -1,6 +1,6 @@
 import { createSelector, WithSlice } from '@reduxjs/toolkit';
 import { apiService as api } from 'src/store/apiService';
-import BudgetWidgetType from '../finance/widgets/types/BudgetWidgetType';
+// import BudgetWidgetType from '../finance/widgets/types/BudgetWidgetType';
 import BudgetDistributionDataType from './tabs/budget/widgets/types/BudgetDistributionDataType';
 import ExpensesDataType from './tabs/budget/widgets/types/ExpensesDataType';
 import BudgetDetailsDataType from './tabs/budget/widgets/types/BudgetDetailsDataType';
@@ -37,7 +37,7 @@ const ProjectDashboardApi = api
 export default ProjectDashboardApi;
 
 export type ProjectDashboardWidgetType =
-	| BudgetWidgetType
+	// | BudgetWidgetType
 	| BudgetDetailsDataType
 	| BudgetDistributionDataType
 	| ExpensesDataType
