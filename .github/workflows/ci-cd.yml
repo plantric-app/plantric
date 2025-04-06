@@ -64,6 +64,6 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          npm build
+          npm run build
 
       # Optional: Deploy step (can be added for Netlify, Vercel, or Heroku)
