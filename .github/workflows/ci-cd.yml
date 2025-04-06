@@ -37,7 +37,7 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          cd backend
+          cd backend/plantric_app
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
