@@ -1,10 +1,17 @@
-import { useState, useEffect, useCallback, useMemo, useImperativeHandle } from 'react';
-import { FuseAuthProviderComponentProps, FuseAuthProviderState } from '@fuse/core/FuseAuthProvider/types/FuseAuthTypes';
+import {
+	useState,
+	useEffect,
+	useCallback,
+	useMemo,
+	useImperativeHandle
+} from 'react';
+import {
+	FuseAuthProviderComponentProps,
+	FuseAuthProviderState
+} from '@fuse/core/FuseAuthProvider/types/FuseAuthTypes';
 import useLocalStorage from '@fuse/hooks/useLocalStorage';
-import { authRefreshToken, authSignIn, authSignInWithToken, authSignUp, authUpdateDbUser } from '@auth/authApi';
 import { User } from '../../user';
 import { removeGlobalHeaders, setGlobalHeaders } from '@/utils/apiFetch';
-import { isTokenValid } from './utils/jwtUtils';
 import JwtAuthContext from '@auth/services/jwt/JwtAuthContext';
 import { JwtAuthContextType } from '@auth/services/jwt/JwtAuthContext';
 
@@ -28,62 +35,49 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		removeValue: removeTokenStorageValue
 	} = useLocalStorage<string>('jwt_access_token');
 
-	/**
-	 * Fuse Auth Provider State
-	 */
 	const [authState, setAuthState] = useState<FuseAuthProviderState<User>>({
 		authStatus: 'configuring',
 		isAuthenticated: false,
 		user: null
 	});
 
-	/**
-	 * Watch for changes in the auth state
-	 * and pass them to the FuseAuthProvider
-	 */
 	useEffect(() => {
 		if (onAuthStateChanged) {
 			onAuthStateChanged(authState);
 		}
 	}, [authState, onAuthStateChanged]);
 
-	/**
-	 * Attempt to auto login with the stored token
-	 */
 	useEffect(() => {
 		const attemptAutoLogin = async () => {
-			const accessToken = tokenStorageValue;
+			const token = tokenStorageValue;
 
-			if (isTokenValid(accessToken)) {
-				try {
-					/**
-					 * Sign in with the token
-					 */
-					const response = await authSignInWithToken(accessToken);
+			if (!token) return false;
 
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
+			try {
+				const res = await fetch('http://localhost:5000/api/auth/me', {
+					headers: {
+						Authorization: `Bearer ${token}`
 					}
+				});
 
-					const userData = (await response.json()) as User;
+				if (!res.ok) throw new Error();
 
-					return userData;
-				} catch {
-					return false;
-				}
+				const user = await res.json();
+				return user;
+			} catch {
+				return false;
 			}
-
-			return false;
 		};
 
 		if (!authState.isAuthenticated) {
-			attemptAutoLogin().then((userData) => {
-				if (userData) {
+			attemptAutoLogin().then((user) => {
+				if (user) {
 					setAuthState({
 						authStatus: 'authenticated',
 						isAuthenticated: true,
-						user: userData
+						user
 					});
+					setGlobalHeaders({ Authorization: `Bearer ${tokenStorageValue}` });
 				} else {
 					removeTokenStorageValue();
 					removeGlobalHeaders(['Authorization']);
@@ -95,61 +89,65 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 				}
 			});
 		}
-		// eslint-disable-next-line
 	}, [authState.isAuthenticated]);
 
-	/**
-	 * Sign in
-	 */
 	const signIn: JwtAuthContextType['signIn'] = useCallback(
 		async (credentials) => {
-			const response = await authSignIn(credentials);
+			const res = await fetch('http://localhost:5000/api/auth/signin', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(credentials)
+			});
 
-			const session = (await response.json()) as { user: User; access_token: string };
+			const data = await res.json();
 
-			if (session) {
+			if (res.ok) {
+				setTokenStorageValue(data.access_token);
+				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
+
 				setAuthState({
 					authStatus: 'authenticated',
 					isAuthenticated: true,
-					user: session.user
+					user: data.user
 				});
-				setTokenStorageValue(session.access_token);
-				setGlobalHeaders({ Authorization: `Bearer ${session.access_token}` });
 			}
 
-			return response;
+			return res;
 		},
 		[setTokenStorageValue]
 	);
 
-	/**
-	 * Sign up
-	 */
 	const signUp: JwtAuthContextType['signUp'] = useCallback(
-		async (data) => {
-			const response = await authSignUp(data);
+		async (payload) => {
+			const res = await fetch('http://localhost:5000/api/auth/signup', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
+			});
 
-			const session = (await response.json()) as { user: User; access_token: string };
+			const data = await res.json();
 
-			if (session) {
+			if (res.ok) {
+				setTokenStorageValue(data.access_token);
+				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
+
 				setAuthState({
 					authStatus: 'authenticated',
 					isAuthenticated: true,
-					user: session.user
+					user: data.user
 				});
-				setTokenStorageValue(session.access_token);
-				setGlobalHeaders({ Authorization: `Bearer ${session.access_token}` });
 			}
 
-			return response;
+			return res;
 		},
 		[setTokenStorageValue]
 	);
 
-	/**
-	 * Sign out
-	 */
-	const signOut: JwtAuthContextType['signOut'] = useCallback(() => {
+	const signOut = useCallback(() => {
 		removeTokenStorageValue();
 		removeGlobalHeaders(['Authorization']);
 		setAuthState({
@@ -159,32 +157,41 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		});
 	}, [removeTokenStorageValue]);
 
-	/**
-	 * Update user
-	 */
-	const updateUser: JwtAuthContextType['updateUser'] = useCallback(async (_user) => {
+	const updateUser: JwtAuthContextType['updateUser'] = useCallback(async (user) => {
 		try {
-			return await authUpdateDbUser(_user);
-		} catch (error) {
-			console.error('Error updating user:', error);
-			return Promise.reject(error);
+			const res = await fetch('http://localhost:5000/api/auth/update', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${tokenStorageValue}`
+				},
+				body: JSON.stringify(user)
+			});
+			return res;
+		} catch (err) {
+			console.error(err);
+			return Promise.reject(err);
 		}
-	}, []);
+	}, [tokenStorageValue]);
 
-	/**
-	 * Refresh access token
-	 */
 	const refreshToken: JwtAuthContextType['refreshToken'] = useCallback(async () => {
-		const response = await authRefreshToken();
+		const res = await fetch('http://localhost:5000/api/auth/refresh', {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${tokenStorageValue}`
+			}
+		});
 
-		if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+		if (!res.ok) throw new Error('Token refresh failed');
 
-		return response;
-	}, []);
+		const data = await res.json();
 
-	/**
-	 * Auth Context Value
-	 */
+		setTokenStorageValue(data.access_token);
+		setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
+
+		return data.access_token;
+	}, [tokenStorageValue]);
+
 	const authContextValue = useMemo(
 		() =>
 			({
@@ -198,47 +205,12 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		[authState, signIn, signUp, signOut, updateUser, refreshToken]
 	);
 
-	/**
-	 * Expose methods to the FuseAuthProvider
-	 */
 	useImperativeHandle(ref, () => ({
 		signOut,
 		updateUser
 	}));
 
-	/**
-	 * Intercept fetch requests to refresh the access token
-	 */
-	const interceptFetch = useCallback(() => {
-		const { fetch: originalFetch } = window;
-
-		window.fetch = async (...args) => {
-			const [resource, config] = args;
-			const response = await originalFetch(resource, config);
-			const newAccessToken = response.headers.get('New-Access-Token');
-
-			if (newAccessToken) {
-				setGlobalHeaders({ Authorization: `Bearer ${newAccessToken}` });
-				setTokenStorageValue(newAccessToken);
-			}
-
-			if (response.status === 401) {
-				signOut();
-
-				console.error('Unauthorized request. User was signed out.');
-			}
-
-			return response;
-		};
-	}, [setTokenStorageValue, signOut]);
-
-	useEffect(() => {
-		if (authState.isAuthenticated) {
-			interceptFetch();
-		}
-	}, [authState.isAuthenticated, interceptFetch]);
-
-	return <JwtAuthContext value={authContextValue}>{children}</JwtAuthContext>;
+	return <JwtAuthContext.Provider value={authContextValue}>{children}</JwtAuthContext.Provider>;
 }
 
 export default JwtAuthProvider;
