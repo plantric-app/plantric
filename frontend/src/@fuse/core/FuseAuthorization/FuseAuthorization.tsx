@@ -13,7 +13,7 @@ import FuseLoading from '../FuseLoading';
 type FuseAuthorizationProps = {
 	children: React.ReactNode;
 	location: Location;
-	userRole: string[] | string;
+	// userRole: string[] | string;
 	loginRedirectUrl?: string;
 } & WithRouterProps;
 
@@ -61,7 +61,7 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 	}
 
 	static getDerivedStateFromProps(props: FuseAuthorizationProps) {
-		const { location, userRole } = props;
+		const { location } = props;
 		const { pathname } = location;
 
 		const auth = getFuseRouteParamUtil<FuseRouteObjectType['auth']>(pathname, 'auth', false);
@@ -69,11 +69,11 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 
 		// is auth is empy array
 		const isOnlyGuestAllowed = Array.isArray(auth) && auth.length === 0;
-		const isGuest = isUserGuest(userRole);
+		// const isGuest = isUserGuest(userRole);
 
-		const userHasPermission = FuseUtils.hasPermission(auth, userRole);
+		// const userHasPermission = FuseUtils.hasPermission(auth, userRole);
 
-		if (auth && !userHasPermission && !ignoredPaths.includes(pathname)) {
+		if (auth && !ignoredPaths.includes(pathname)) {
 			setSessionRedirectUrl(pathname);
 		}
 
@@ -81,7 +81,7 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 		 * If user is member but don't have permission to view the route
 		 * redirected to main route '/'
 		 */
-		if (!userHasPermission && !isGuest && !ignoredPaths.includes(pathname)) {
+		if (!ignoredPaths.includes(pathname)) {
 			if (isOnlyGuestAllowed) {
 				setSessionRedirectUrl('/');
 			} else {
@@ -90,29 +90,29 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 		}
 
 		return {
-			accessGranted: auth ? userHasPermission : true
+			accessGranted: auth
 		};
 	}
 
 	redirectRoute() {
-		const { userRole, navigate, loginRedirectUrl = '/' } = this.props;
+		const { navigate, loginRedirectUrl = '/' } = this.props;
 		const redirectUrl = getSessionRedirectUrl() || loginRedirectUrl;
 
 		/*
 		User is guest
 		Redirect to Login Page
 		*/
-		if (isUserGuest(userRole)) {
-			setTimeout(() => navigate('/sign-in'), 0);
-		} else {
-			/*
-		  User is member
-		  User must be on unAuthorized page or just logged in
-		  Redirect to dashboard or loginRedirectUrl
-			*/
-			setTimeout(() => navigate(redirectUrl), 0);
-			resetSessionRedirectUrl();
-		}
+		// if (isUserGuest(userRole)) {
+		// 	setTimeout(() => navigate('/sign-in'), 0);
+		// } else {
+		// 	/*
+		//   User is member
+		//   User must be on unAuthorized page or just logged in
+		//   Redirect to dashboard or loginRedirectUrl
+		// 	*/
+		// 	setTimeout(() => navigate(redirectUrl), 0);
+		// 	resetSessionRedirectUrl();
+		// }
 	}
 
 	render() {

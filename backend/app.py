@@ -11,7 +11,7 @@ from flask_bcrypt import Bcrypt
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 bcrypt = Bcrypt()
 
@@ -70,25 +70,13 @@ def signin():
 
 # If session is still active
 @app.route('/api/auth/me', methods=['GET'])
+@jwt_required()
 def get_me():
-    auth_header = request.headers.get('Authorization')
-    if not auth_header:
-        return jsonify({'message': 'Token missing'}), 401
-
-    token = auth_header.split(" ")[1]
-    try:
-        decoded = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-        user = User.query.get(decoded['user_id'])
-        return jsonify({
-            'id': user.id,
-            'email': user.username,
-            'displayName': user.username
-        }), 200
-    except jwt.ExpiredSignatureError:
-        return jsonify({'message': 'Token expired'}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({'message': 'Invalid token'}), 401
-
+    current_user = get_jwt_identity()  # ✅ This gets the identity from the token
+    return jsonify({
+        "email": current_user["email"],
+        "displayName": current_user["name"]
+    }), 200
 
 
 # Sign Up Route (example only)

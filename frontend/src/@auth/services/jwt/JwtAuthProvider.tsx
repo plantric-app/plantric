@@ -14,6 +14,8 @@ import { User } from '../../user';
 import { removeGlobalHeaders, setGlobalHeaders } from '@/utils/apiFetch';
 import JwtAuthContext from '@auth/services/jwt/JwtAuthContext';
 import { JwtAuthContextType } from '@auth/services/jwt/JwtAuthContext';
+// import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router';
 
 export type JwtSignInPayload = {
 	email: string;
@@ -28,6 +30,7 @@ export type JwtSignUpPayload = {
 
 function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	const { ref, children, onAuthStateChanged } = props;
+	const navigate = useNavigate();
 
 	const {
 		value: tokenStorageValue,
@@ -102,16 +105,26 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			});
 
 			const data = await res.json();
+			console.log(data);
 
 			if (res.ok) {
-				setTokenStorageValue(data.access_token);
+				console.log("ACCESS TOKEN FROM API:", data.access_token);
+				console.log("BEFORE STORING:", localStorage.getItem("jwt_access_token"));
+
+				setTokenStorageValue(data.access_token); // your custom hook
+
+				// Confirm after saving
+				console.log("AFTER STORING:", localStorage.getItem("jwt_access_token"));
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
 
 				setAuthState({
 					authStatus: 'authenticated',
 					isAuthenticated: true,
 					user: data.user
+					
 				});
+
+				navigate('/');
 			}
 
 			return res;

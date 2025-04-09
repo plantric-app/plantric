@@ -61,7 +61,7 @@ function JwtSignInForm() {
 		})
 		.then(() => {
 			// ✅ Redirect to dashboard on successful login
-			navigate('/dashboard/project');
+			navigate('/');
 		})
 		.catch((error: FetchApiError) => {
 			const errorData = error.data as {
