@@ -27,7 +27,7 @@ const routes: FuseRoutesType = [
 	{
 		path: '/',
 		element: <App />,
-		auth: settingsConfig.defaultAuth,
+		auth: ['admin', 'user'],
 		errorElement: <ErrorBoundary />,
 		children: [
 			{

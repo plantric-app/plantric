@@ -13,8 +13,7 @@ type useUser = {
 };
 
 function useUser(): useUser {
-	const { authState, signOut, updateUser } = useAuth();
-	const user = authState?.user as User;
+	const { user, signOut, updateUser } = useAuth();
 	const isGuest = useMemo(() => !user?.role || user?.role?.length === 0, [user]);
 
 	/**

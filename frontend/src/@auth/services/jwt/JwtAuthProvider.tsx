@@ -14,8 +14,8 @@ import { User } from '../../user';
 import { removeGlobalHeaders, setGlobalHeaders } from '@/utils/apiFetch';
 import JwtAuthContext from '@auth/services/jwt/JwtAuthContext';
 import { JwtAuthContextType } from '@auth/services/jwt/JwtAuthContext';
-// import { useNavigate } from 'react-router-dom'
 import { useNavigate } from 'react-router';
+import FuseLoading from '@fuse/core/FuseLoading';
 
 export type JwtSignInPayload = {
 	email: string;
@@ -38,6 +38,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		removeValue: removeTokenStorageValue
 	} = useLocalStorage<string>('jwt_access_token');
 
+	const [loading, setLoading] = useState(true); // ⬅️ ADDED
 	const [authState, setAuthState] = useState<FuseAuthProviderState<User>>({
 		authStatus: 'configuring',
 		isAuthenticated: false,
@@ -53,7 +54,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	useEffect(() => {
 		const attemptAutoLogin = async () => {
 			const token = tokenStorageValue;
-
+			console.log("token: " + token)
 			if (!token) return false;
 
 			try {
@@ -62,19 +63,28 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 						Authorization: `Bearer ${token}`
 					}
 				});
-
-				if (!res.ok) throw new Error();
+				
+				if (!res.ok) return false;
 
 				const user = await res.json();
+				console.log('👤 Auto-login user from /me:', user);
+
+				if (!user?.email || !user?.role) {
+					console.warn('❌ Invalid user object returned from /me. Logging out.');
+					return false;
+				}
+
 				return user;
 			} catch {
 				return false;
 			}
 		};
 
-		if (!authState.isAuthenticated) {
+		if (authState.authStatus === 'configuring') {
+			console.log('🔁 Attempting auto-login...');
 			attemptAutoLogin().then((user) => {
 				if (user) {
+					console.log('✅ Auto-login successful:', user);
 					setAuthState({
 						authStatus: 'authenticated',
 						isAuthenticated: true,
@@ -82,6 +92,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 					});
 					setGlobalHeaders({ Authorization: `Bearer ${tokenStorageValue}` });
 				} else {
+					console.warn('⛔ Auto-login failed. Logging out.');
 					removeTokenStorageValue();
 					removeGlobalHeaders(['Authorization']);
 					setAuthState({
@@ -89,10 +100,12 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 						isAuthenticated: false,
 						user: null
 					});
+					navigate('/sign-in')
 				}
+				setLoading(false); // ⬅️ Done checking, stop loading
 			});
 		}
-	}, [authState.isAuthenticated]);
+	}, [authState.authStatus]);
 
 	const signIn: JwtAuthContextType['signIn'] = useCallback(
 		async (credentials) => {
@@ -105,25 +118,15 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			});
 
 			const data = await res.json();
-			console.log(data);
 
 			if (res.ok) {
-				console.log("ACCESS TOKEN FROM API:", data.access_token);
-				console.log("BEFORE STORING:", localStorage.getItem("jwt_access_token"));
-
-				setTokenStorageValue(data.access_token); // your custom hook
-
-				// Confirm after saving
-				console.log("AFTER STORING:", localStorage.getItem("jwt_access_token"));
+				setTokenStorageValue(data.access_token);
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
-
 				setAuthState({
 					authStatus: 'authenticated',
 					isAuthenticated: true,
 					user: data.user
-					
 				});
-
 				navigate('/');
 			}
 
@@ -147,7 +150,6 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			if (res.ok) {
 				setTokenStorageValue(data.access_token);
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
-
 				setAuthState({
 					authStatus: 'authenticated',
 					isAuthenticated: true,
@@ -168,6 +170,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			isAuthenticated: false,
 			user: null
 		});
+		navigate('/sign-in');
 	}, [removeTokenStorageValue]);
 
 	const updateUser: JwtAuthContextType['updateUser'] = useCallback(async (user) => {
@@ -198,30 +201,31 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		if (!res.ok) throw new Error('Token refresh failed');
 
 		const data = await res.json();
-
 		setTokenStorageValue(data.access_token);
 		setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
-
 		return data.access_token;
 	}, [tokenStorageValue]);
 
-	const authContextValue = useMemo(
-		() =>
-			({
-				...authState,
-				signIn,
-				signUp,
-				signOut,
-				updateUser,
-				refreshToken
-			}) as JwtAuthContextType,
-		[authState, signIn, signUp, signOut, updateUser, refreshToken]
-	);
+	const authContextValue: JwtAuthContextType = {
+		authStatus: authState.authStatus,
+		isAuthenticated: authState.isAuthenticated,
+		user: authState.user,
+		signIn,
+		signUp,
+		signOut,
+		updateUser,
+		refreshToken,
+	};
 
 	useImperativeHandle(ref, () => ({
 		signOut,
 		updateUser
 	}));
+
+	// ⬅️ Show loading screen until auto-login completes
+	if (loading) {
+		return <FuseLoading />;
+	}
 
 	return <JwtAuthContext.Provider value={authContextValue}>{children}</JwtAuthContext.Provider>;
 }
