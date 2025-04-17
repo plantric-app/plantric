@@ -66,6 +66,61 @@ const navigationConfig: FuseNavItemType[] = [
 					},
 				]
 			},
+			{
+				id: 'Roles',
+				title: 'Roles',
+				type: 'collapse',
+				icon: 'heroicons-outline:clipboard-document-check',
+				translate: 'Roles',
+				children: [
+					{
+						id: 'roles.create',
+						title: 'Create',
+						type: 'item',
+						icon: 'heroicons-outline:plus',
+						url: '/create/roles'
+					},
+					{
+                        id: 'roles.view',
+						title: 'View',
+						type: 'item',
+						icon: 'heroicons-outline:eye',
+						url: '/view/roles'
+					},
+				]
+			},
+			{
+				id: 'Permissions',
+				title: 'Permissons',
+				type: 'collapse',
+				icon: 'heroicons-outline:clipboard-document-check',
+				translate: 'Permissions',
+				children: [
+					{
+						id: 'permission.create',
+						title: 'Create',
+						type: 'item',
+						icon: 'heroicons-outline:plus',
+						url: '/create/ppermision'
+					},
+					{
+                        id: 'permission.view',
+						title: 'View',
+						type: 'item',
+						icon: 'heroicons-outline:eye',
+						url: '/view/permission'
+					},
+				]
+			},
+			{
+				id: 'Teams',
+				title: 'Teams',
+				type: 'item',
+				icon: 'heroicons-outline:user',
+				url: '/'
+			},
+			
+
 		]
 		
 	},
