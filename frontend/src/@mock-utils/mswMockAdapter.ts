@@ -24,13 +24,13 @@ import appTeamMembersApi from './api/appTeamMembersApi';
 import tasksApi from './api/tasksApi';
 import contactsApi from './api/contactsApi';
 import countriesApi from './api/countriesApi';
-import authApi from './api/authApi';
+// import authApi from './api/authApi';
 import aiImageGeneratorApi from './api/aiImageGeneratorApi';
 
 // This configures a Service Worker with the given request handlers.
 export const worker = setupWorker(
 	...[
-		...authApi,
+		// ...authApi,
 		...usersApi,
 		...profileApi,
 		...uiIconsApi,

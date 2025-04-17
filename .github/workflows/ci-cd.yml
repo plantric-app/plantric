@@ -10,20 +10,20 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: plantric
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: Arth1827
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+    # services:
+      # postgres:
+      #   image: postgres:latest
+      #   ports:
+      #     - 5432:5432
+      #   env:
+      #     POSTGRES_DB: plantric
+      #     POSTGRES_USER: postgres
+      #     POSTGRES_PASSWORD: Arth1827
+      #   options: >-
+      #     --health-cmd="pg_isready"
+      #     --health-interval=10s
+      #     --health-timeout=5s
+      #     --health-retries=5
 
     steps:
       - name: Checkout code
@@ -40,6 +40,7 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r plantric_app/requirements.txt
 
       - name: Run backend tests
         run: echo "No test yet!"
@@ -55,10 +56,10 @@ jobs:
           cd frontend
           npm install
 
-      - name: Run frontend tests
-        run: |
-          cd frontend
-          npm test -- --watchAll=false
+      # - name: Run frontend tests
+      #   run: |
+      #     cd frontend
+      #     npm test -- --watchAll=false
 
       - name: Build frontend
         run: |

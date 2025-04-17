@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import useJwtAuth from '../useJwtAuth';
 import { FetchApiError } from '@/utils/apiFetch';
 import { JwtSignInPayload } from '../JwtAuthProvider';
+import { useNavigate } from 'react-router';
 
 /**
  * Form Validation Schema
@@ -35,6 +36,7 @@ const defaultValues = {
 };
 
 function JwtSignInForm() {
+	const navigate = useNavigate();
 	const { signIn } = useJwtAuth();
 
 	const { control, formState, handleSubmit, setValue, setError } = useForm<FormType>({
@@ -56,7 +58,12 @@ function JwtSignInForm() {
 		signIn({
 			email,
 			password
-		}).catch((error: FetchApiError) => {
+		})
+		.then(() => {
+			// ✅ Redirect to dashboard on successful login
+			navigate('/');
+		})
+		.catch((error: FetchApiError) => {
 			const errorData = error.data as {
 				type: 'email' | 'password' | 'remember' | `root.${string}` | 'root';
 				message: string;

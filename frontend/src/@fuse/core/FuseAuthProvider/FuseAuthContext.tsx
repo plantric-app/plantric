@@ -18,13 +18,19 @@ export const initialAuthState: AuthState = {
 export type FuseAuthContextType = {
 	updateUser?: (U: PartialDeep<User>) => Promise<Response>;
 	signOut?: () => void;
-	authState: FuseAuthProviderState | null;
+	authStatus: FuseAuthProviderState['authStatus'];
+	isAuthenticated: boolean;
+	user: User | null;
 	providers: FuseAuthProviderType[];
 };
 
+
 const FuseAuthContext = createContext<FuseAuthContextType>({
-	authState: initialAuthState,
+	authStatus: null,
+	isAuthenticated: false,
+	user: null,
 	providers: []
 });
+
 
 export default FuseAuthContext;

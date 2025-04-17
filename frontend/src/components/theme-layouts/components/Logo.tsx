@@ -1,6 +1,6 @@
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import MainProjectSelection from '@/components/MainProjectSelection';
+// import MainProjectSelection from '@/components/MainProjectSelection';
 
 const Root = styled('div')(({ theme }) => ({
 	'& > .logo-icon': {
@@ -42,7 +42,7 @@ function Logo() {
 					</Typography>
 				</div>
 			</div>
-			<MainProjectSelection />
+			{/* <MainProjectSelection /> */}
 		</Root>
 	);
 }
