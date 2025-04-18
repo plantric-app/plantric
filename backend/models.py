@@ -9,7 +9,7 @@ class User(db.Model):
     email = Column(String(120), unique=True, nullable=False)
     password = Column(String(200), nullable=False)
     role = Column(String(50), nullable=False)
-    dob = Column(Date, nullable=False)
+    dob = Column(Date, nullable=True)
     profile = Column(String(250), nullable=True)
     bio = Column(String(250), nullable=True)
     gender = Column(String(50), nullable=True)
