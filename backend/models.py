@@ -42,6 +42,7 @@ class compTable(db.Model):
 class userRole(db.Model):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+
     company_id = Column(Integer, ForeignKey('comp_table.id'), nullable=False)
     role = Column(String(250), nullable=False)
 
@@ -57,4 +58,3 @@ class teamMember(db.Model):
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('team.id'), nullable=False)
-
