@@ -67,7 +67,7 @@ const navigationConfig: FuseNavItemType[] = [
 				]
 			},
 			{
-				id: 'Roles',
+				id: 'Role',
 				title: 'Roles',
 				type: 'collapse',
 				icon: 'heroicons-outline:clipboard-document-check',
@@ -90,7 +90,7 @@ const navigationConfig: FuseNavItemType[] = [
 				]
 			},
 			{
-				id: 'Permissions',
+				id: 'Permission',
 				title: 'Permissons',
 				type: 'collapse',
 				icon: 'heroicons-outline:clipboard-document-check',
@@ -101,7 +101,7 @@ const navigationConfig: FuseNavItemType[] = [
 						title: 'Create',
 						type: 'item',
 						icon: 'heroicons-outline:plus',
-						url: '/create/ppermision'
+						url: '/create/permission'
 					},
 					{
                         id: 'permission.view',
