@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 from extensions import db
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.dialects.postgresql import BOOLEAN
@@ -59,4 +57,4 @@ class teamMember(db.Model):
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('team.id'), nullable=False)
->>>>>>> Stashed changes
+
