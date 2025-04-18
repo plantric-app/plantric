@@ -1,5 +1,18 @@
 # from extensions import db
 # from sqlalchemy import Column, Integer, String
+<<<<<<< Updated upstream
+=======
+
+# class User(db.Model):
+#     id = Column(Integer, primary_key=True)
+#     username = Column(String(50), nullable=False)
+#     email = Column(String(120), unique=True, nullable=False)
+#     password = Column(String(200), nullable=False)
+#     role = Column(String(50), nullable=False)
+
+from extensions import db
+from sqlalchemy import Column, Integer, String
+>>>>>>> Stashed changes
 
 # class User(db.Model):
 #     id = Column(Integer, primary_key=True)
@@ -21,6 +34,7 @@ class User(db.Model):
     email = Column(String(120), unique=True, nullable=False)
     password = Column(String(200), nullable=False)
     role = Column(String(50), nullable=False)
+<<<<<<< Updated upstream
     dob = Column(Date, nullable=True)
     profile = Column(String(250), nullable=True)
     bio = Column(String(250), nullable=True)
@@ -70,3 +84,5 @@ class teamMember(db.Model):
     id = Column(Integer, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     team_id = Column(Integer, ForeignKey('team.id'), nullable=False)
+=======
+>>>>>>> Stashed changes

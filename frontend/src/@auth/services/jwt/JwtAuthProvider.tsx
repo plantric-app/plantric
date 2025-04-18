@@ -61,6 +61,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	}, [authState, onAuthStateChanged]);
 
 	useEffect(() => {
+<<<<<<< Updated upstream
 		if (authState.authStatus === 'configuring') {
 			const token = tokenStorageValue;
 			if (token) {
@@ -83,6 +84,42 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 					const { name, email, role } = decoded.sub;
 
+=======
+		const attemptAutoLogin = async () => {
+			const token = tokenStorageValue;
+			// console.log("token: " + token)
+
+			if (!token) return false;
+
+			try {
+				const res = await fetch('http://localhost:5050/api/auth/me', {
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
+
+				if (!res.ok) return false;
+
+				const user = await res.json();
+				// console.log('👤 Auto-login user from /me:', user);
+
+				if (!user?.email || !user?.role) {
+					// console.warn('❌ Invalid user object returned from /me. Logging out.');
+					return false;
+				}
+
+				return user;
+			} catch {
+				return false;
+			}
+		};
+
+		if (authState.authStatus === 'configuring') {
+			// console.log('🔁 Attempting auto-login...');
+			attemptAutoLogin().then((user) => {
+				if (user) {
+					// console.log('✅ Auto-login successful:', user);
+>>>>>>> Stashed changes
 					setAuthState({
 						authStatus: 'authenticated',
 						isAuthenticated: true,
@@ -92,9 +129,15 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 							role: Array.isArray(role) ? role : [role]
 						} as User
 					});
+<<<<<<< Updated upstream
 					setGlobalHeaders({ Authorization: `Bearer ${token}` });
 
 				} catch (error) {
+=======
+					setGlobalHeaders({ Authorization: `Bearer ${tokenStorageValue}` });
+				} else {
+					// console.warn('⛔ Auto-login failed. Logging out.');
+>>>>>>> Stashed changes
 					removeTokenStorageValue();
 					removeGlobalHeaders(['Authorization']);
 					setAuthState({
