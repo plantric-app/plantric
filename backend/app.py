@@ -13,8 +13,6 @@ from flask_bcrypt import Bcrypt
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
-
-
 bcrypt = Bcrypt()
 
 # Use your PostgreSQL credentials here
@@ -24,7 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 load_dotenv()
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
 
 db.init_app(app)
 jwt = JWTManager(app)
@@ -74,7 +72,7 @@ def signin():
     token = create_access_token(identity={"email": user.email, "name": user.username, "role": user.role})
     
     return jsonify(
-        user={"email": user.email, "name": user.username, "role": user.role},
+        user={"email": user.email, "displayName": user.username, "role": user.role},
         access_token=token
     ), 200
 
