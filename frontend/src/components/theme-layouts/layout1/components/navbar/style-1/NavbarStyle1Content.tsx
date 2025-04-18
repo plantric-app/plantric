@@ -69,7 +69,6 @@ function NavbarStyle1Content(props: NavbarStyle1ContentProps) {
 			{/* <GoToDocBox className="mx-3 my-4" /> */}
 
 			<Divider />
-
 			<div className="p-1 md:p-4 w-full">
 				<UserMenu className="w-full" />
 			</div>

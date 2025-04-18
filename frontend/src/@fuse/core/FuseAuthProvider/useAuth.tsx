@@ -1,11 +1,11 @@
 import { useContext } from 'react';
-import FuseAuthContext, { FuseAuthContextType } from './FuseAuthContext';
+import JwtAuthContext, { JwtAuthContextType } from '@auth/services/jwt/JwtAuthContext';
 
-function useAuth(): FuseAuthContextType {
-	const context = useContext(FuseAuthContext);
+function useAuth(): JwtAuthContextType {
+	const context = useContext(JwtAuthContext);
 
 	if (!context) {
-		throw new Error('useAuth must be used within a AuthRouteProvider');
+		throw new Error('useAuth must be used within a JwtAuthProvider');
 	}
 
 	return context;

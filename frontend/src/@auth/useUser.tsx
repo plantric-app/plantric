@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { User } from '@auth/user';
-import useAuth from '@fuse/core/FuseAuthProvider/useAuth';
+import useAuth from '@auth/services/jwt/useJwtAuth'; // ✅ Corrected path
 import _ from 'lodash';
 import setIn from '@/utils/setIn';
 
@@ -14,12 +14,13 @@ type useUser = {
 
 function useUser(): useUser {
 	const { user, signOut, updateUser } = useAuth();
-	const isGuest = useMemo(() => !user?.role || user?.role?.length === 0, [user]);
 
-	/**
-	 * Update user
-	 * Uses current auth provider's updateUser method
-	 */
+	const isGuest = useMemo(() => {
+		if (!user?.role) return true;
+		if (Array.isArray(user.role)) return user.role.length === 0;
+		return false;
+	}, [user]);
+
 	async function handleUpdateUser(_data: Partial<User>) {
 		const response = await updateUser(_data);
 
@@ -28,14 +29,9 @@ function useUser(): useUser {
 		}
 
 		const updatedUser = (await response.json()) as User;
-
 		return updatedUser;
 	}
 
-	/**
-	 * Update user settings
-	 * Uses current auth provider's updateUser method
-	 */
 	async function handleUpdateUserSettings(newSettings: User['settings']) {
 		const newUser = setIn(user, 'settings', newSettings) as User;
 
@@ -44,13 +40,9 @@ function useUser(): useUser {
 		}
 
 		const updatedUser = await handleUpdateUser(newUser);
-
 		return updatedUser?.settings;
 	}
 
-	/**
-	 * Sign out
-	 */
 	async function handleSignOut() {
 		return signOut();
 	}
