@@ -40,8 +40,8 @@ def home():
 
 @app.route('/add')
 def add_user():
-    hashed_password = bcrypt.generate_password_hash("5;4+0IOx:\\Dy").decode('utf-8')
-    user = User(username='admin', email='admin@fusetheme.com', password = hashed_password, role = 'admin')
+    hashed_password = bcrypt.generate_password_hash("Arth1827").decode('utf-8')
+    user = User(username='Arth', email='arthpatel@gmail.com', password = hashed_password, role = 'admin')
     db.session.add(user)
     db.session.commit()
     return 'User added!'
