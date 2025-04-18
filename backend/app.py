@@ -8,6 +8,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import os
 from flask_bcrypt import Bcrypt
+from datetime import date
 
 
 app = Flask(__name__)
@@ -41,7 +42,16 @@ def home():
 @app.route('/add')
 def add_user():
     hashed_password = bcrypt.generate_password_hash("Arth1827").decode('utf-8')
-    user = User(username='Arth', email='arthpatel@gmail.com', password = hashed_password, role = 'admin')
+    user = User(
+        username='Arth',
+        email='arthpatel@gmail.com',
+        password=hashed_password,
+        role='admin',
+        dob = date(2001, 5, 22),  # 👈 provide a valid date
+        profile=None,
+        bio=None,
+        gender=None
+        )
     db.session.add(user)
     db.session.commit()
     return 'User added!'

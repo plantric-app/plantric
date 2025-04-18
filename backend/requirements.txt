@@ -4,3 +4,6 @@ psycopg2==2.9.3
 flask_sqlalchemy==2.5.1
 flask_cors==3.0.10
 # Add other dependencies as needed
+
+flask-bcrypt
+python-dotenv
