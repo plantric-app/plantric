@@ -21,7 +21,13 @@ function GithubIssuesWidget() {
 	const [tabValue, setTabValue] = useState(0);
 	const { data: widgets, isLoading } = useGetProjectDashboardWidgetsQuery();
 	const widget = widgets?.githubIssues as GithubIssuesDataType;
+
+	if (isLoading || !widget) {
+		return <FuseLoading />;
+	}
+
 	const { overview, series, ranges, labels } = widget;
+
 	const currentRange = Object.keys(ranges)[tabValue];
 
 	const chartOptions: ApexOptions = {
@@ -105,9 +111,10 @@ function GithubIssuesWidget() {
 		return <FuseLoading />;
 	}
 
-	if (!widget) {
-		return null;
-	}
+	// if (!widget) {
+	// 	return null;
+	// }
+	// const { overview, series, ranges, labels } = widget;
 
 	if (awaitRender) {
 		return null;

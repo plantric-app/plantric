@@ -6,7 +6,7 @@ import JwtAuthProvider from '@auth/services/jwt/JwtAuthProvider';
 import { FuseAuthProviderType } from '@fuse/core/FuseAuthProvider/types/FuseAuthTypes';
 import FuseAuthProvider from '@fuse/core/FuseAuthProvider';
 import FuseAuthorization from '@fuse/core/FuseAuthorization';
-import { User } from '@auth/user';
+// import { User } from '@auth/user';
 /**
  * The Authentication providers.
  */
@@ -35,7 +35,7 @@ function Authentication(props: AuthenticationProps) {
 	return (
 		<FuseAuthProvider providers={authProviders}>
 			{(authState) => {
-				const userRole = (authState?.user?.role ?? 'admin') as string[] | string;				;
+				const userRole = (authState?.user?.role ?? 'admin') as string[] | string;
 				return <FuseAuthorization userRole={userRole}>{children}</FuseAuthorization>;
 			}}
 		</FuseAuthProvider>
