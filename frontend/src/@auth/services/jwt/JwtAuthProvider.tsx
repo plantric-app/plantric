@@ -129,7 +129,6 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			});
 
 			const data = await res.json();
-			console.log(data)
 			if (res.ok) {
 				setTokenStorageValue(data.access_token);
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
