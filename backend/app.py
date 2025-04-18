@@ -1,6 +1,6 @@
 from flask import Flask
 from extensions import db
-from models import User
+from backend.models1 import User
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -11,7 +11,9 @@ from flask_bcrypt import Bcrypt
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+
+
 
 bcrypt = Bcrypt()
 
@@ -27,6 +29,13 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
 db.init_app(app)
 jwt = JWTManager(app)
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
+
+
 @app.route('/')
 def home():
     return 'Flask with PostgreSQL is working!'
@@ -34,7 +43,7 @@ def home():
 @app.route('/add')
 def add_user():
     hashed_password = bcrypt.generate_password_hash("5;4+0IOx:\\Dy").decode('utf-8')
-    user = User(username='admin', email='admin@fusetheme.com', password = hashed_password)
+    user = User(username='admin', email='admin@fusetheme.com', password = hashed_password, role = 'admin')
     db.session.add(user)
     db.session.commit()
     return 'User added!'
@@ -53,6 +62,7 @@ def signin():
     email = data.get("email")
     password = data.get("password")
 
+
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
 
@@ -61,10 +71,10 @@ def signin():
     if not user or not bcrypt.check_password_hash(user.password, password):
         return jsonify({"message": "Invalid credentials"}), 401
 
-    token = create_access_token(identity={"email": user.email, "name": user.username})
+    token = create_access_token(identity={"email": user.email, "name": user.username, "role": user.role})
     
     return jsonify(
-        user={"email": user.email, "name": user.username},
+        user={"email": user.email, "name": user.username, "role": user.role},
         access_token=token
     ), 200
 
@@ -72,12 +82,13 @@ def signin():
 @app.route('/api/auth/me', methods=['GET'])
 @jwt_required()
 def get_me():
+    print("🔐 AUTH HEADER:", request.headers.get('Authorization'))
     current_user = get_jwt_identity()  # ✅ This gets the identity from the token
     return jsonify({
         "email": current_user["email"],
-        "displayName": current_user["name"]
+        "displayName": current_user["name"],
+        "role": current_user["role"]
     }), 200
-
 
 # Sign Up Route (example only)
 @app.route('/api/auth/signup', methods=['POST'])
@@ -86,13 +97,19 @@ def signup():
     email = data.get("email")
     password = data.get("password")
     name = data.get("displayName")
+    role = data.get("role", "user")
 
-    if email in USERS:
+    if User.query.filter_by(email=email).first():
         return jsonify({"message": "User already exists"}), 400
 
-    USERS[email] = {"password": password, "name": name}
-    token = create_access_token(identity={"email": email, "name": name})
-    return jsonify(user={"email": email, "name": name}, access_token=token)
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    user = User(username=name, email=email, password=hashed_password, role=role)
+    db.session.add(user)
+    db.session.commit()
+
+    token = create_access_token(identity={"email": email, "name": name, "role": role})
+
+    return jsonify(user={"email": email, "name": name, "role": role}, access_token=token), 200
 
 # Protected Route
 @app.route('/api/user/profile', methods=['GET'])
