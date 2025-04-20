@@ -30,7 +30,6 @@ function UserMenu(props: UserMenuProps) {
 	const userMenuClick = (event: React.MouseEvent<HTMLElement>) => {
 		setUserMenu(event.currentTarget);
 	};
-
 	const userMenuClose = () => {
 		setUserMenu(null);
 	};

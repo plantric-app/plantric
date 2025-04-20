@@ -1,6 +1,6 @@
 from flask import Flask
 from extensions import db
-from backend.models1 import User
+from models import User
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -8,12 +8,11 @@ from datetime import timedelta
 from dotenv import load_dotenv
 import os
 from flask_bcrypt import Bcrypt
+from datetime import date
 
 
 app = Flask(__name__)
 # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
-
-
 
 bcrypt = Bcrypt()
 
@@ -24,7 +23,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 load_dotenv()
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
 
 db.init_app(app)
 jwt = JWTManager(app)
@@ -113,7 +112,7 @@ def signin():
     token = create_access_token(identity={"email": user.email, "name": user.username, "role": user.role})
     
     return jsonify(
-        user={"email": user.email, "name": user.username, "role": user.role},
+        user={"email": user.email, "displayName": user.username, "role": user.role},
         access_token=token
     ), 200
 

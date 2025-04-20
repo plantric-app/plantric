@@ -4,11 +4,12 @@ from sqlalchemy.dialects.postgresql import BOOLEAN
 
 # ---------- User Table ----------
 class User(db.Model):
-    id = Column(Integer, primary_key=True, nullable=False)
-    name = Column(String(250), nullable=False)
-    email = Column(String(250), unique=True, nullable=False)
-    password = Column(String(200), nullable=True)
-    dob = Column(Date, nullable=False)
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
+    password = Column(String(200), nullable=False)
+    role = Column(String(50), nullable=False)
+    dob = Column(Date, nullable=True)
     profile = Column(String(250), nullable=True)
     bio = Column(String(250), nullable=True)
     gender = Column(String(50), nullable=True)
@@ -41,7 +42,8 @@ class compTable(db.Model):
 class userRole(db.Model):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    company_email = Column(Integer, ForeignKey('comp_table.id'), nullable=False)
+
+    company_id = Column(Integer, ForeignKey('comp_table.id'), nullable=False)
     role = Column(String(250), nullable=False)
 
 # ---------- Team Table ----------

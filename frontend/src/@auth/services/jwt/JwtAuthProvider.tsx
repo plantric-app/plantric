@@ -16,6 +16,16 @@ import JwtAuthContext from '@auth/services/jwt/JwtAuthContext';
 import { JwtAuthContextType } from '@auth/services/jwt/JwtAuthContext';
 import { useNavigate } from 'react-router';
 import FuseLoading from '@fuse/core/FuseLoading';
+import jwtDecode from 'jwt-decode';
+import { isEmpty } from 'lodash';
+import { JwtUser } from '@auth/user/types/JwtUser';
+import { decode } from 'punycode';
+import { FetchApiError } from '@/utils/apiFetch';
+
+interface DecodedToken {
+	sub: JwtUser;
+	exp: number;
+}
 
 export type JwtSignInPayload = {
 	email: string;
@@ -38,7 +48,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		removeValue: removeTokenStorageValue
 	} = useLocalStorage<string>('jwt_access_token');
 
-	const [loading, setLoading] = useState(true); // ⬅️ ADDED
+	const [loading, setLoading] = useState(true);
 	const [authState, setAuthState] = useState<FuseAuthProviderState<User>>({
 		authStatus: 'configuring',
 		isAuthenticated: false,
@@ -52,47 +62,40 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	}, [authState, onAuthStateChanged]);
 
 	useEffect(() => {
-		const attemptAutoLogin = async () => {
-			const token = tokenStorageValue;
-			console.log("token: " + token)
-			if (!token) return false;
-
-			try {
-				const res = await fetch('http://localhost:5000/api/auth/me', {
-					headers: {
-						Authorization: `Bearer ${token}`
-					}
-				});
-				
-				if (!res.ok) return false;
-
-				const user = await res.json();
-				console.log('👤 Auto-login user from /me:', user);
-
-				if (!user?.email || !user?.role) {
-					console.warn('❌ Invalid user object returned from /me. Logging out.');
-					return false;
-				}
-
-				return user;
-			} catch {
-				return false;
-			}
-		};
-
 		if (authState.authStatus === 'configuring') {
-			console.log('🔁 Attempting auto-login...');
-			attemptAutoLogin().then((user) => {
-				if (user) {
-					console.log('✅ Auto-login successful:', user);
+			const token = tokenStorageValue;
+			if (token) {
+				try {
+					const decoded = jwtDecode<DecodedToken>(token);
+					const expiresAt = decoded.exp * 1000;
+					const currentTime = Date.now();
+					if (expiresAt < currentTime) {
+						removeTokenStorageValue();
+						removeGlobalHeaders(['Authorization']);
+						setAuthState({
+							authStatus: 'unauthenticated',
+							isAuthenticated: false,
+							user: null
+						});
+						navigate('/sign-in');
+						setLoading(false);
+						return;
+					}
+
+					const { name, email, role } = decoded.sub;
+
 					setAuthState({
 						authStatus: 'authenticated',
 						isAuthenticated: true,
-						user
+						user: {
+							displayName: name,
+							email: email,
+							role: Array.isArray(role) ? role : [role]
+						} as User
 					});
-					setGlobalHeaders({ Authorization: `Bearer ${tokenStorageValue}` });
-				} else {
-					console.warn('⛔ Auto-login failed. Logging out.');
+					setGlobalHeaders({ Authorization: `Bearer ${token}` });
+
+				} catch (error) {
 					removeTokenStorageValue();
 					removeGlobalHeaders(['Authorization']);
 					setAuthState({
@@ -100,10 +103,19 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 						isAuthenticated: false,
 						user: null
 					});
-					navigate('/sign-in')
+					navigate('/sign-in');
 				}
-				setLoading(false); // ⬅️ Done checking, stop loading
-			});
+			} else {
+				removeGlobalHeaders(['Authorization']);
+				setAuthState({
+					authStatus: 'unauthenticated',
+					isAuthenticated: false,
+					user: null
+				});
+				navigate('/sign-in');
+			}
+
+			setLoading(false);
 		}
 	}, [authState.authStatus]);
 
@@ -119,7 +131,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			});
 
 			const data = await res.json();
-
+			if (!res.ok) {
+				throw new FetchApiError(res.status, data);
+			}
 			if (res.ok) {
 				setTokenStorageValue(data.access_token);
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
@@ -215,7 +229,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		signUp,
 		signOut,
 		updateUser,
-		refreshToken,
+		refreshToken
 	};
 
 	useImperativeHandle(ref, () => ({
@@ -223,11 +237,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		updateUser
 	}));
 
-	// ⬅️ Show loading screen until auto-login completes
 	if (loading) {
 		return <FuseLoading />;
 	}
-
 	return <JwtAuthContext.Provider value={authContextValue}>{children}</JwtAuthContext.Provider>;
 }
 
