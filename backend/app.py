@@ -12,12 +12,12 @@ from datetime import date
 
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+# CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
 bcrypt = Bcrypt()
 
 # Use your PostgreSQL credentials here
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:Arth1827@localhost:5432/plantric'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://neelshah:Neel11@localhost:5432/plantric'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -27,13 +27,18 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
 
 db.init_app(app)
 jwt = JWTManager(app)
+# CORS(app, origins="http://localhost:3000", supports_credentials=True)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    return response
 
+
+# @app.after_request
+# def after_request(response):
+#     response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+#     response.headers.add('Access-Control-Allow-Credentials', 'true')
+#     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+#     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+#     return response
 
 @app.route('/')
 def home():
@@ -41,10 +46,10 @@ def home():
 
 @app.route('/add')
 def add_user():
-    hashed_password = bcrypt.generate_password_hash("Arth1827").decode('utf-8')
+    hashed_password = bcrypt.generate_password_hash("5;4+0IOx:\\Dy").decode('utf-8')
     user = User(
         username='Arth',
-        email='arthpatel@gmail.com',
+        email='admin@fusetheme.com',
         password=hashed_password,
         role='admin',
         dob = date(2001, 5, 22),  # 👈 provide a valid date
@@ -64,12 +69,37 @@ USERS = {
 }
 
 # Login Route
-@app.route('/api/auth/signin', methods=['POST'])
+# @app.route('/api/auth/signin', methods=['POST'])
+# def signin():
+    
+#     data = request.json
+#     email = data.get("email")
+#     password = data.get("password")
+
+
+#     if not email or not password:
+#         return jsonify({"message": "Email and password are required"}), 400
+
+#     user = User.query.filter_by(email=email).first()
+
+#     if not user or not bcrypt.check_password_hash(user.password, password):
+#         return jsonify({"message": "Invalid credentials"}), 401
+
+#     token = create_access_token(identity={"email": user.email, "name": user.username, "role": user.role})
+    
+#     return jsonify(
+#         user={"email": user.email, "displayName": user.username, "role": user.role},
+#         access_token=token
+#     ), 200
+
+@app.route('/api/auth/signin', methods=['POST', 'OPTIONS'])
 def signin():
-    data = request.json
+    if request.method == 'OPTIONS':
+        return '', 204  # Preflight response
+
+    data = request.get_json()
     email = data.get("email")
     password = data.get("password")
-
 
     if not email or not password:
         return jsonify({"message": "Email and password are required"}), 400
@@ -85,6 +115,8 @@ def signin():
         user={"email": user.email, "displayName": user.username, "role": user.role},
         access_token=token
     ), 200
+
+
 
 # If session is still active
 @app.route('/api/auth/me', methods=['GET'])
@@ -127,4 +159,4 @@ def profile():
     return jsonify(user=current_user)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+        app.run(debug=True, port=5001)
