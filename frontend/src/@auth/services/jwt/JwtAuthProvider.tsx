@@ -109,8 +109,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 	const signIn: JwtAuthContextType['signIn'] = useCallback(
 		async (credentials) => {
-			const res = await fetch('http://localhost:5000/api/auth/signin', {
+			const res = await fetch('http://localhost:5001/api/auth/signin', {
 				method: 'POST',
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json'
 				},
@@ -137,7 +138,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 	const signUp: JwtAuthContextType['signUp'] = useCallback(
 		async (payload) => {
-			const res = await fetch('http://localhost:5000/api/auth/signup', {
+			const res = await fetch('http://localhost:5001/api/auth/signup', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -175,7 +176,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 	const updateUser: JwtAuthContextType['updateUser'] = useCallback(async (user) => {
 		try {
-			const res = await fetch('http://localhost:5000/api/auth/update', {
+			const res = await fetch('http://localhost:5001/api/auth/update', {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
@@ -191,7 +192,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	}, [tokenStorageValue]);
 
 	const refreshToken: JwtAuthContextType['refreshToken'] = useCallback(async () => {
-		const res = await fetch('http://localhost:5000/api/auth/refresh', {
+		const res = await fetch('http://localhost:5001/api/auth/refresh', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${tokenStorageValue}`
