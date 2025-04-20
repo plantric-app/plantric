@@ -48,9 +48,6 @@ def home():
 @app.route('/add')
 def add_user():
     hashed_password = bcrypt.generate_password_hash("5;4+0IOx:\\Dy").decode('utf-8')
-<<<<<<< Updated upstream
-    user = User(username='admin', email='admin@fusetheme.com', password = hashed_password, role = 'admin')
-=======
     user = User(
         username='Arth',
         email='admin@fusetheme.com',
@@ -61,7 +58,6 @@ def add_user():
         bio=None,
         gender=None
         )
->>>>>>> Stashed changes
     db.session.add(user)
     db.session.commit()
     return 'User added!'
