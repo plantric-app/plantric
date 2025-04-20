@@ -20,6 +20,7 @@ import jwtDecode from 'jwt-decode';
 import { isEmpty } from 'lodash';
 import { JwtUser } from '@auth/user/types/JwtUser';
 import { decode } from 'punycode';
+import { FetchApiError } from '@/utils/apiFetch';
 
 interface DecodedToken {
 	sub: JwtUser;
@@ -129,6 +130,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			});
 
 			const data = await res.json();
+			if (!res.ok) {
+				throw new FetchApiError(res.status, data);
+			}
 			if (res.ok) {
 				setTokenStorageValue(data.access_token);
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
