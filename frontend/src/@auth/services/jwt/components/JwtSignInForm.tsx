@@ -13,6 +13,8 @@ import useJwtAuth from '../useJwtAuth';
 import { FetchApiError } from '@/utils/apiFetch';
 import { JwtSignInPayload } from '../JwtAuthProvider';
 import { useNavigate } from 'react-router';
+import { Typography } from '@mui/material';
+
 
 /**
  * Form Validation Schema
@@ -59,23 +61,29 @@ function JwtSignInForm() {
 			email,
 			password
 		})
-		.then(() => {
-			// ✅ Redirect to dashboard on successful login
-			navigate('/');
-		})
-		.catch((error: FetchApiError) => {
-			const errorData = error.data as {
-				type: 'email' | 'password' | 'remember' | `root.${string}` | 'root';
-				message: string;
-			}[];
-
-			errorData?.forEach?.((err) => {
-				setError(err.type, {
-					type: 'manual',
-					message: err.message
-				});
+			.then(() => {
+				// ✅ Redirect to dashboard on successful login
+				navigate('/');
+			})
+			.catch(async (error: FetchApiError) => {
+				try {
+					// If the server returns a JSON error message
+					const response = await error.data as { message?: string };
+					if (response?.message) {
+						setError('root', {
+							type: 'manual',
+							message: response.message
+						});
+					}
+					
+				} catch (err) {
+					console.error('Error parsing error response:', err);
+					setError('root', {
+						type: 'manual',
+						message: 'An unexpected error occurred.'
+					});
+				}
 			});
-		});
 	}
 
 	return (
@@ -148,6 +156,16 @@ function JwtSignInForm() {
 					Forgot password?
 				</Link>
 			</div>
+
+			{errors.root && (
+	<Typography
+		color="error"
+		className="mt-8 text-center"
+	>
+		{errors.root.message}
+	</Typography>
+)}
+
 
 			<Button
 				variant="contained"
