@@ -7,13 +7,13 @@ class User(db.Model):
     id = Column(Integer, primary_key=True)
     username = Column(String(50), nullable=False)
     email = Column(String(120), unique=True, nullable=False)
-    password = Column(String(200), nullable=False)
-    role = Column(String(50), nullable=False)
+    password = Column(String(200), nullable=True)
+    role = Column(String(50), nullable=True)
     dob = Column(Date, nullable=True)
     profile = Column(String(250), nullable=True)
     bio = Column(String(250), nullable=True)
-    gender = Column(String(50), nullable=True)
-    isActive = Column(BOOLEAN, default=True)
+    gender = Column(String(50), nullable=True) 
+    is_active = Column(BOOLEAN, default=True)
 
 # ---------- WBS Form Table ----------
 # class wbsForm(db.Model):

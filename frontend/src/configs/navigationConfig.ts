@@ -113,6 +113,29 @@ const navigationConfig: FuseNavItemType[] = [
 				]
 			},
 			{
+				id: 'Company',
+				title: 'Permissons',
+				type: 'collapse',
+				icon: 'heroicons-outline:clipboard-document-check',
+				translate: 'Company',
+				children: [
+					{
+						id: 'company.create',
+						title: 'Add',
+						type: 'item',
+						icon: 'heroicons-outline:plus',
+						url: '/create/company'
+					},
+					{
+                        id: 'company.view',
+						title: 'View',
+						type: 'item',
+						icon: 'heroicons-outline:eye',
+						url: '/view/company'
+					},
+				]
+			},
+			{
 				id: 'Teams',
 				title: 'Teams',
 				type: 'item',

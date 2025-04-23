@@ -28,6 +28,13 @@ interface HotModule {
 	};
 }
 
+/**
+ * The type definition for the module that exports the 'msw' library.
+ */
+declare module 'msw/rest' {
+	export * from 'msw';
+  }
+
 declare const module: HotModule;
 declare module '*?raw' {
 	const content: string;

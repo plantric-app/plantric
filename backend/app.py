@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 from flask_bcrypt import Bcrypt
 from datetime import date
+from routes.user_routes import user_bp
 
 
 app = Flask(__name__)
@@ -24,6 +25,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 load_dotenv()
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
+
+# User table routes
+app.register_blueprint(user_bp, url_prefix='/api')
 
 db.init_app(app)
 jwt = JWTManager(app)
