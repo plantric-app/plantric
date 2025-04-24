@@ -2,24 +2,22 @@ import {
 	useState,
 	useEffect,
 	useCallback,
-	useMemo,
-	useImperativeHandle
+	useImperativeHandle,
+	useRef
 } from 'react';
+import { useNavigate, useLocation } from 'react-router';
 import {
 	FuseAuthProviderComponentProps,
 	FuseAuthProviderState
 } from '@fuse/core/FuseAuthProvider/types/FuseAuthTypes';
 import useLocalStorage from '@fuse/hooks/useLocalStorage';
-import { User } from '../../user';
-import { removeGlobalHeaders, setGlobalHeaders } from '@/utils/apiFetch';
 import JwtAuthContext from '@auth/services/jwt/JwtAuthContext';
 import { JwtAuthContextType } from '@auth/services/jwt/JwtAuthContext';
-import { useNavigate } from 'react-router';
-import FuseLoading from '@fuse/core/FuseLoading';
+import { User } from '../../user';
+import { removeGlobalHeaders, setGlobalHeaders } from '@/utils/apiFetch';
 import jwtDecode from 'jwt-decode';
-import { isEmpty } from 'lodash';
+import FuseLoading from '@fuse/core/FuseLoading';
 import { JwtUser } from '@auth/user/types/JwtUser';
-import { decode } from 'punycode';
 import { FetchApiError } from '@/utils/apiFetch';
 
 interface DecodedToken {
@@ -40,7 +38,11 @@ export type JwtSignUpPayload = {
 
 function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	const { ref, children, onAuthStateChanged } = props;
+
 	const navigate = useNavigate();
+	const location = useLocation();
+	const hasInitialized = useRef(false);
+	const PUBLIC_PATHS = ['/sign-in', '/register', '/404', '/401'];
 
 	const {
 		value: tokenStorageValue,
@@ -62,89 +64,93 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	}, [authState, onAuthStateChanged]);
 
 	useEffect(() => {
-		if (authState.authStatus === 'configuring') {
-			const token = tokenStorageValue;
-			if (token) {
-				try {
-					const decoded = jwtDecode<DecodedToken>(token);
-					const expiresAt = decoded.exp * 1000;
-					const currentTime = Date.now();
-					if (expiresAt < currentTime) {
-						removeTokenStorageValue();
-						removeGlobalHeaders(['Authorization']);
-						setAuthState({
-							authStatus: 'unauthenticated',
-							isAuthenticated: false,
-							user: null
-						});
-						navigate('/sign-in');
-						setLoading(false);
-						return;
-					}
+		if (hasInitialized.current) return;
+		hasInitialized.current = true;
 
-					const { name, email, role } = decoded.sub;
+		const token = tokenStorageValue;
 
-					setAuthState({
-						authStatus: 'authenticated',
-						isAuthenticated: true,
-						user: {
-							displayName: name,
-							email: email,
-							role: Array.isArray(role) ? role : [role]
-						} as User
-					});
-					setGlobalHeaders({ Authorization: `Bearer ${token}` });
+		const finish = (newState: FuseAuthProviderState<User>) => {
+			setAuthState(newState);
+			setLoading(false);
+		};
 
-				} catch (error) {
-					removeTokenStorageValue();
-					removeGlobalHeaders(['Authorization']);
-					setAuthState({
-						authStatus: 'unauthenticated',
-						isAuthenticated: false,
-						user: null
-					});
-					navigate('/sign-in');
-				}
-			} else {
+		if (!token) {
+			removeGlobalHeaders(['Authorization']);
+			finish({
+				authStatus: 'unauthenticated',
+				isAuthenticated: false,
+				user: null
+			});
+			if (!PUBLIC_PATHS.includes(location.pathname)) {
+				navigate('/sign-in');
+			}
+			return;
+		}
+
+		try {
+			const decoded = jwtDecode<DecodedToken>(token);
+			const expiresAt = decoded.exp * 1000;
+			const currentTime = Date.now();
+
+			if (expiresAt < currentTime) {
+				removeTokenStorageValue();
 				removeGlobalHeaders(['Authorization']);
-				setAuthState({
+				finish({
 					authStatus: 'unauthenticated',
 					isAuthenticated: false,
 					user: null
 				});
-				navigate('/sign-in');
+				if (!PUBLIC_PATHS.includes(location.pathname)) {
+					navigate('/sign-in');
+				}
+				return;
 			}
 
-			setLoading(false);
+			const { name, email, role } = decoded.sub;
+			setGlobalHeaders({ Authorization: `Bearer ${token}` });
+			finish({
+				authStatus: 'authenticated',
+				isAuthenticated: true,
+				user: {
+					displayName: name,
+					email,
+					role: Array.isArray(role) ? role : [role]
+				} as User
+			});
+		} catch (error) {
+			removeTokenStorageValue();
+			removeGlobalHeaders(['Authorization']);
+			finish({
+				authStatus: 'unauthenticated',
+				isAuthenticated: false,
+				user: null
+			});
+			if (!PUBLIC_PATHS.includes(location.pathname)) {
+				navigate('/sign-in');
+			}
 		}
-	}, [authState.authStatus]);
+	}, []);
 
 	const signIn: JwtAuthContextType['signIn'] = useCallback(
 		async (credentials) => {
 			const res = await fetch('http://localhost:5001/api/auth/signin', {
 				method: 'POST',
 				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json'
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(credentials)
 			});
 
 			const data = await res.json();
-			if (!res.ok) {
-				throw new FetchApiError(res.status, data);
-			}
-			if (res.ok) {
-				setTokenStorageValue(data.access_token);
-				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
-				setAuthState({
-					authStatus: 'authenticated',
-					isAuthenticated: true,
-					user: data.user
-				});
-				navigate('/');
-			}
+			if (!res.ok) throw new FetchApiError(res.status, data);
 
+			setTokenStorageValue(data.access_token);
+			setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
+			setAuthState({
+				authStatus: 'authenticated',
+				isAuthenticated: true,
+				user: data.user
+			});
+			navigate('/');
 			return res;
 		},
 		[setTokenStorageValue]
@@ -154,24 +160,20 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 		async (payload) => {
 			const res = await fetch('http://localhost:5001/api/auth/signup', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload)
 			});
 
 			const data = await res.json();
+			if (!res.ok) throw new FetchApiError(res.status, data);
 
-			if (res.ok) {
-				setTokenStorageValue(data.access_token);
-				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
-				setAuthState({
-					authStatus: 'authenticated',
-					isAuthenticated: true,
-					user: data.user
-				});
-			}
-
+			setTokenStorageValue(data.access_token);
+			setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
+			setAuthState({
+				authStatus: 'authenticated',
+				isAuthenticated: true,
+				user: data.user
+			});
 			return res;
 		},
 		[setTokenStorageValue]
@@ -185,7 +187,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			isAuthenticated: false,
 			user: null
 		});
-		navigate('/sign-in');
+		if (!PUBLIC_PATHS.includes(location.pathname)) {
+			navigate('/sign-in');
+		}
 	}, [removeTokenStorageValue]);
 
 	const updateUser: JwtAuthContextType['updateUser'] = useCallback(async (user) => {
@@ -240,7 +244,12 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	if (loading) {
 		return <FuseLoading />;
 	}
-	return <JwtAuthContext.Provider value={authContextValue}>{children}</JwtAuthContext.Provider>;
+
+	return (
+		<JwtAuthContext.Provider value={authContextValue}>
+			{children}
+		</JwtAuthContext.Provider>
+	);
 }
 
 export default JwtAuthProvider;

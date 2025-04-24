@@ -10,6 +10,7 @@ import os
 from flask_bcrypt import Bcrypt
 from datetime import date
 
+from config import Config
 
 app = Flask(__name__)
 # CORS(app, supports_credentials=True, origins=["http://localhost:3000"])

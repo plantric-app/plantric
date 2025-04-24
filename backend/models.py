@@ -46,7 +46,7 @@ class userRole(db.Model):
     company_id = Column(Integer, ForeignKey('comp_table.id'), nullable=False)
     role = Column(String(250), nullable=False)
 
-# ---------- Team Table ----------
+# ---------- Team Table -----------------
 class team(db.Model):
     id = Column(Integer, primary_key=True)
     created_by = Column(Integer, ForeignKey('user.id'), nullable=False)
