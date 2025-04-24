@@ -25,8 +25,6 @@ db.init_app(app)
 jwt = JWTManager(app)
 
 
-
-
 # @app.after_request
 # def after_request(response):
 #     response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
@@ -154,4 +152,4 @@ def profile():
     return jsonify(user=current_user)
 
 if __name__ == '__main__':
-        app.run(debug=True, port=5001)
+        app.run(debug=True, port=5000)

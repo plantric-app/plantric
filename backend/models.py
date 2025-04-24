@@ -36,7 +36,7 @@ class compTable(db.Model):
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String(250), nullable=False)
     email = Column(String(250), unique=True, nullable=False)
-    isActive = Column(BOOLEAN, default=True)
+    is_active = Column(BOOLEAN, default=True)
 
 # ---------- User Role Table ----------
 class userRole(db.Model):
