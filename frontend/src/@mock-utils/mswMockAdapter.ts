@@ -26,6 +26,15 @@ import contactsApi from './api/contactsApi';
 import countriesApi from './api/countriesApi';
 // import authApi from './api/authApi';
 import aiImageGeneratorApi from './api/aiImageGeneratorApi';
+// import { rest } from 'msw/rest';
+
+// export const handlers = [
+// 	rest.all('http://localhost:5001/*', (req, res, ctx) => {
+// 		return req.passthrough();
+// 	}),
+// 	// optionally spread others like:
+// 	// ...usersApi
+// ];
 
 // This configures a Service Worker with the given request handlers.
 export const worker = setupWorker(
@@ -56,6 +65,11 @@ export const worker = setupWorker(
 		...tasksApi,
 		...contactsApi,
 		...countriesApi,
-		...aiImageGeneratorApi
-	]
+		...aiImageGeneratorApi,
+
+		// rest.all('http://localhost:5001/*', (req, res, ctx) => {
+		// 	return req.passthrough();
+		// }),
+	],
+	
 );
