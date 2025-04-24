@@ -48,7 +48,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "types": ["msw"],
   },
   "exclude": [
     "src/app/(public)/documentation/material-ui-components/components/**/*",

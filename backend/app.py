@@ -9,10 +9,11 @@ from dotenv import load_dotenv
 import os
 from flask_bcrypt import Bcrypt
 from datetime import date
+from routes.user_routes import user_bp
 
 
 app = Flask(__name__)
-# CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 bcrypt = Bcrypt()
 
@@ -25,10 +26,12 @@ load_dotenv()
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
 
+# User table routes
+app.register_blueprint(user_bp, url_prefix='/api')
+
 db.init_app(app)
 jwt = JWTManager(app)
-# CORS(app, origins="http://localhost:3000", supports_credentials=True)
-CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
 
 
 
@@ -46,10 +49,10 @@ def home():
 
 @app.route('/add')
 def add_user():
-    hashed_password = bcrypt.generate_password_hash("5;4+0IOx:\\Dy").decode('utf-8')
+    hashed_password = bcrypt.generate_password_hash("neel11").decode('utf-8')
     user = User(
-        username='Arth',
-        email='admin@fusetheme.com',
+        username='Neel',
+        email='neelshah@gmail.com',
         password=hashed_password,
         role='admin',
         dob = date(2001, 5, 22),  # 👈 provide a valid date
@@ -92,10 +95,10 @@ USERS = {
 #         access_token=token
 #     ), 200
 
-@app.route('/api/auth/signin', methods=['POST', 'OPTIONS'])
+@app.route('/api/auth/signin', methods=['POST'])
 def signin():
-    if request.method == 'OPTIONS':
-        return '', 204  # Preflight response
+    # if request.method == 'OPTIONS':
+    #     return '', 204  # Preflight response
 
     data = request.get_json()
     email = data.get("email")
@@ -119,16 +122,16 @@ def signin():
 
 
 # If session is still active
-@app.route('/api/auth/me', methods=['GET'])
-@jwt_required()
-def get_me():
-    print("🔐 AUTH HEADER:", request.headers.get('Authorization'))
-    current_user = get_jwt_identity()  # ✅ This gets the identity from the token
-    return jsonify({
-        "email": current_user["email"],
-        "displayName": current_user["name"],
-        "role": current_user["role"]
-    }), 200
+# @app.route('/api/auth/me', methods=['GET'])
+# @jwt_required()
+# def get_me():
+#     print("🔐 AUTH HEADER:", request.headers.get('Authorization'))
+#     current_user = get_jwt_identity()  # ✅ This gets the identity from the token
+#     return jsonify({
+#         "email": current_user["email"],
+#         "displayName": current_user["name"],
+#         "role": current_user["role"]
+#     }), 200
 
 # Sign Up Route (example only)
 @app.route('/api/auth/signup', methods=['POST'])
