@@ -15,17 +15,8 @@ from config import Config
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
-
+app.config.from_object(Config)
 bcrypt = Bcrypt()
-
-# Use your PostgreSQL credentials here
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://neelshah:Neel11@localhost:5432/plantric'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
-load_dotenv()
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
 
 # User table routes
 app.register_blueprint(user_bp, url_prefix='/api')
