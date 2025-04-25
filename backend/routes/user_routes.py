@@ -1,12 +1,16 @@
-from flask import Blueprint, request, jsonify
+# routes/user_routes.py
+
+from flask import Blueprint, request, jsonify, current_app
+from sqlalchemy.exc import IntegrityError
 from extensions import db
 from models import User
 from utils.mailer import send_invite_email
-from sqlalchemy.exc import IntegrityError
-from flask import current_app
+from utils.token import verify_invite_token
 
+# Blueprint for user routes
 user_bp = Blueprint('user', __name__)
 
+# Route to create a new user and send invite email
 @user_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
@@ -20,6 +24,8 @@ def create_user():
         new_user = User(username=username, email=email, is_active=False)
         db.session.add(new_user)
         db.session.commit()
+
+        # Send email with invite link
         send_invite_email(new_user, current_app)
         return jsonify({"message": "User created and invite sent"}), 201
 
@@ -27,6 +33,7 @@ def create_user():
         db.session.rollback()
         return jsonify({"message": "Email already exists"}), 409
 
+# Route to retrieve all users
 @user_bp.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
@@ -35,6 +42,7 @@ def get_users():
         for u in users
     ])
 
+# Route to update an existing user
 @user_bp.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
     data = request.get_json()
@@ -47,6 +55,7 @@ def update_user(id):
     db.session.commit()
     return jsonify({"message": "User updated"})
 
+# Route to delete a user
 @user_bp.route('/users/<int:id>', methods=['DELETE'])
 def delete_user(id):
     user = User.query.get_or_404(id)
@@ -54,11 +63,9 @@ def delete_user(id):
     db.session.commit()
     return jsonify({"message": "User deleted"})
 
-
+# Route to handle invite link with token verification
 @user_bp.route('/invite', methods=['GET'])
 def handle_invite():
-    from utils.token import verify_invite_token
-
     token = request.args.get('token')
     user_id = verify_invite_token(token)
 
@@ -69,7 +76,6 @@ def handle_invite():
     if not user:
         return jsonify({"message": "User not found"}), 404
 
-    # Optionally activate the user or take them to signup page
     return jsonify({
         "message": "Welcome to Plantric!",
         "user": {
@@ -78,4 +84,3 @@ def handle_invite():
             "username": user.username
         }
     }), 200
-
