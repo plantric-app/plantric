@@ -3,6 +3,7 @@ from extensions import db
 from models import User
 from utils.mailer import send_invite_email
 from sqlalchemy.exc import IntegrityError
+from flask import current_app
 
 user_bp = Blueprint('user', __name__)
 
@@ -19,8 +20,7 @@ def create_user():
         new_user = User(username=username, email=email, is_active=False)
         db.session.add(new_user)
         db.session.commit()
-
-        send_invite_email(email, username)  # 💌 fire that SMTP
+        send_invite_email(new_user, current_app)
         return jsonify({"message": "User created and invite sent"}), 201
 
     except IntegrityError:
@@ -53,3 +53,29 @@ def delete_user(id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": "User deleted"})
+
+
+@user_bp.route('/invite', methods=['GET'])
+def handle_invite():
+    from utils.token import verify_invite_token
+
+    token = request.args.get('token')
+    user_id = verify_invite_token(token)
+
+    if not user_id:
+        return jsonify({"message": "Invalid or expired invite link"}), 400
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    # Optionally activate the user or take them to signup page
+    return jsonify({
+        "message": "Welcome to Plantric!",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username
+        }
+    }), 200
+
