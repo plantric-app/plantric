@@ -1,9 +1,31 @@
+# from extensions import db
+# from sqlalchemy import Column, Integer, String
+
+# class User(db.Model):
+#     id = Column(Integer, primary_key=True)
+#     username = Column(String(50), nullable=False)
+#     email = Column(String(120), unique=True, nullable=False)
+#     password = Column(String(200), nullable=False)
+#     role = Column(String(50), nullable=False)
+
+from extensions import db
+from sqlalchemy import Column, Integer, String
+
+# class User(db.Model):
+#     id = Column(Integer, primary_key=True)
+#     username = Column(String(50), nullable=False)
+#     email = Column(String(120), unique=True, nullable=False)
+#     password = Column(String(200), nullable=False)
+#     role = Column(String(50), nullable=False)
+
 from extensions import db
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.dialects.postgresql import BOOLEAN
 
 # ---------- User Table ----------
 class User(db.Model):
+    __tablename__ = 'users'
+
     id = Column(Integer, primary_key=True)
     username = Column(String(50), nullable=False)
     email = Column(String(120), unique=True, nullable=False)

@@ -44,6 +44,7 @@ function HomeTab() {
 				<FeaturesWidget />
 			</motion.div> */}
 			{/* <motion.div
+			<motion.div
 				variants={item}
 				className="sm:col-span-2 md:col-span-4"
 			>

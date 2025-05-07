@@ -1,6 +1,3 @@
-from flask import Flask
-from extensions import db
-from models import User
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -18,22 +15,33 @@ CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 bcrypt = Bcrypt()
 
 # Use your PostgreSQL credentials here
+# General DB Config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://neelshah:Neel11@localhost:5432/plantric'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+from extensions import db, bcrypt, jwt, migrate
+from models import User
+from flask_jwt_extended import create_refresh_token
 
-
+app = Flask(__name__)
 load_dotenv()
+
+# App configs
+# DB Config for Dvip
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=10)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+
 
 # User table routes
 app.register_blueprint(user_bp, url_prefix='/api')
 
+# Init extensions
 db.init_app(app)
-jwt = JWTManager(app)
-
-
-
+bcrypt.init_app(app)
+jwt.init_app(app)
+migrate.init_app(app, db)
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 # @app.after_request
 # def after_request(response):
@@ -49,6 +57,7 @@ def home():
 
 @app.route('/add')
 def add_user():
+# DB Credentials for the Neel & Arth
     hashed_password = bcrypt.generate_password_hash("neel11").decode('utf-8')
     user = User(
         username='Neel',
@@ -60,9 +69,13 @@ def add_user():
         bio=None,
         gender=None
         )
+# DB Credentials for Dvip
+    hashed_password = bcrypt.generate_password_hash("5;4+0IOx:\\Dy").decode('utf-8')
+    user = User(username='admin', email='admin@fusetheme.com', password=hashed_password, role='admin')
     db.session.add(user)
     db.session.commit()
     return 'User added!'
+
 
 USERS = {
     "admin@fusetheme.com": {
@@ -112,13 +125,28 @@ def signin():
     if not user or not bcrypt.check_password_hash(user.password, password):
         return jsonify({"message": "Invalid credentials"}), 401
 
-    token = create_access_token(identity={"email": user.email, "name": user.username, "role": user.role})
-    
-    return jsonify(
-        user={"email": user.email, "displayName": user.username, "role": user.role},
-        access_token=token
-    ), 200
+    identity = {
+        "email": user.email,
+        "name": user.username,
+        "role": user.role
+    }
 
+    token = create_access_token(identity=identity)
+    # refresh_token = create_refresh_token(identity=identity)
+
+    return jsonify(
+        user=identity,
+        access_token=token,
+        # refresh_token=refresh_token  
+    ), 200
+    
+    
+@app.route('/api/auth/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    current_user = get_jwt_identity()
+    new_access_token = create_access_token(identity=current_user)
+    return jsonify(access_token=new_access_token)
 
 
 # If session is still active
@@ -133,7 +161,16 @@ def signin():
 #         "role": current_user["role"]
 #     }), 200
 
-# Sign Up Route (example only)
+@app.route('/api/auth/me', methods=['GET'])
+@jwt_required()
+def get_me():
+    current_user = get_jwt_identity()
+    return jsonify({
+        "email": current_user["email"],
+        "displayName": current_user["name"],
+        "role": current_user["role"]
+    }), 200
+
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
     data = request.json
@@ -154,7 +191,6 @@ def signup():
 
     return jsonify(user={"email": email, "name": name, "role": role}, access_token=token), 200
 
-# Protected Route
 @app.route('/api/user/profile', methods=['GET'])
 @jwt_required()
 def profile():

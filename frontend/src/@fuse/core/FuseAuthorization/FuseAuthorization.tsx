@@ -35,6 +35,7 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 
 	componentDidMount() {
 		const { accessGranted } = this.state;
+
 		if (!accessGranted) {
 			this.redirectRoute();
 		}
@@ -47,6 +48,7 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 
 	componentDidUpdate() {
 		const { accessGranted } = this.state;
+
 		if (!accessGranted) {
 			this.redirectRoute();
 		}
@@ -55,28 +57,29 @@ class FuseAuthorization extends Component<FuseAuthorizationProps, State> {
 	static getDerivedStateFromProps(props: FuseAuthorizationProps) {
 		const { location, userRole } = props;
 		const { pathname } = location;
-	
+
 		const auth = getFuseRouteParamUtil<FuseRouteObjectType['auth']>(pathname, 'auth', false);
 		const ignoredPaths = ['/', '/callback', '/sign-in', '/sign-out', '/logout', '/404'];
-	
+
 		const isOnlyGuestAllowed = Array.isArray(auth) && auth.length === 0;
 		const isGuest = isUserGuest(userRole);
 		const userHasPermission = FuseUtils.hasPermission(auth, userRole);
-	
+
 		// 👇 Check if user is NOT authenticated
 		if (!userHasPermission || isGuest) {
 			if (!ignoredPaths.includes(pathname)) {
 				setSessionRedirectUrl(pathname);
+
 				if (isOnlyGuestAllowed) return { accessGranted: false };
+
 				return { accessGranted: false };
 			}
 		}
-	
+
 		return {
 			accessGranted: true
 		};
 	}
-	
 
 	redirectRoute() {
 		const { userRole, navigate, loginRedirectUrl = '/' } = this.props;
