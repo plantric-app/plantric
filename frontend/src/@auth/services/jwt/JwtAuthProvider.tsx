@@ -20,6 +20,7 @@ import jwtDecode from 'jwt-decode';
 import { isEmpty } from 'lodash';
 import { JwtUser } from '@auth/user/types/JwtUser';
 import { decode } from 'punycode';
+import { FetchApiError } from '@/utils/apiFetch';
 
 interface DecodedToken {
 	sub: JwtUser;
@@ -61,7 +62,8 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	}, [authState, onAuthStateChanged]);
 
 	useEffect(() => {
-<<<<<<< Updated upstream
+    
+//     Check this file for the main branch
 		if (authState.authStatus === 'configuring') {
 			const token = tokenStorageValue;
 			if (token) {
@@ -84,7 +86,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 					const { name, email, role } = decoded.sub;
 
-=======
+// Check this too, which one is correct?
 		const attemptAutoLogin = async () => {
 			const token = tokenStorageValue;
 			// console.log("token: " + token)
@@ -119,7 +121,8 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			attemptAutoLogin().then((user) => {
 				if (user) {
 					// console.log('✅ Auto-login successful:', user);
->>>>>>> Stashed changes
+// Code used to end here
+          
 					setAuthState({
 						authStatus: 'authenticated',
 						isAuthenticated: true,
@@ -129,15 +132,17 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 							role: Array.isArray(role) ? role : [role]
 						} as User
 					});
-<<<<<<< Updated upstream
-					setGlobalHeaders({ Authorization: `Bearer ${token}` });
 
+//           Updated or Old 
+					setGlobalHeaders({ Authorization: `Bearer ${token}` });
 				} catch (error) {
-=======
+          
+          
+//           Check with main branch for this code
 					setGlobalHeaders({ Authorization: `Bearer ${tokenStorageValue}` });
 				} else {
 					// console.warn('⛔ Auto-login failed. Logging out.');
->>>>>>> Stashed changes
+
 					removeTokenStorageValue();
 					removeGlobalHeaders(['Authorization']);
 					setAuthState({
@@ -163,8 +168,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 	const signIn: JwtAuthContextType['signIn'] = useCallback(
 		async (credentials) => {
-			const res = await fetch('http://localhost:5050/api/auth/signin', {
+			const res = await fetch('http://localhost:5001/api/auth/signin', {
 				method: 'POST',
+				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json'
 				},
@@ -173,6 +179,9 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 			});
 
 			const data = await res.json();
+			if (!res.ok) {
+				throw new FetchApiError(res.status, data);
+			}
 			if (res.ok) {
 				setTokenStorageValue(data.access_token);
 				setGlobalHeaders({ Authorization: `Bearer ${data.access_token}` });
@@ -191,7 +200,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 	const signUp: JwtAuthContextType['signUp'] = useCallback(
 		async (payload) => {
-			const res = await fetch('http://localhost:5050/api/auth/signup', {
+			const res = await fetch('http://localhost:5001/api/auth/signup', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -229,7 +238,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 
 	const updateUser: JwtAuthContextType['updateUser'] = useCallback(async (user) => {
 		try {
-			const res = await fetch('http://localhost:5050/api/auth/update', {
+			const res = await fetch('http://localhost:5001/api/auth/update', {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
@@ -245,7 +254,7 @@ function JwtAuthProvider(props: FuseAuthProviderComponentProps) {
 	}, [tokenStorageValue]);
 
 	const refreshToken: JwtAuthContextType['refreshToken'] = useCallback(async () => {
-		const res = await fetch('http://localhost:5050/api/auth/refresh', {
+		const res = await fetch('http://localhost:5001/api/auth/refresh', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${tokenStorageValue}`

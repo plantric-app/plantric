@@ -1,9 +1,17 @@
 # File: backend/plantric_app/requirements.txt
-flask==2.0.3
-psycopg2==2.9.3
-flask_sqlalchemy==2.5.1
-flask_cors==3.0.10
-# Add other dependencies as needed
 
+flask
+psycopg2
+flask_sqlalchemy
+flask_cors
+flask_jwt_extended
 flask-bcrypt
 python-dotenv
+# File: backend/plantric_app/requirements.txt
+# Flask==2.3.2
+# Flask-Cors==4.0.0
+# Flask-JWT-Extended==4.6.0
+# Flask-Bcrypt==1.0.1
+# Flask-SQLAlchemy==3.1.1
+# python-dotenv==1.0.1
+# psycopg2-binary==2.9.9
